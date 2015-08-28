@@ -12,8 +12,16 @@ class PDFKit
       @is_url ||= @source.is_a?(String) && @source.match(/\Ahttp/)
     end
 
+    def url_list?
+      @is_url_list ||= @source.is_a?(Array) && @source[0].match(/\Ahttp/)
+    end
+
     def file?
       @is_file ||= @source.kind_of?(File)
+    end
+
+    def file_list?
+      @is_file_list ||= @source.is_a?(Array) && @source[0].kind_of?(File)
     end
 
     def html?
@@ -23,6 +31,10 @@ class PDFKit
     def to_input_for_command
       if file?
         @source.path
+      elsif url?
+        %{"#{shell_safe_url}"}
+      elsif file_list?
+        @source.map(&:path).join(' ')
       elsif url?
         %{"#{shell_safe_url}"}
       else
